@@ -5,4 +5,5 @@ Either ami retarded ba ei library ta osshikhito, whatever the case, if u need to
 
 ## Do not file code issues, they will not be fixed and you will be ignored. 
 I wrote this in one day and i dont get paid at all to mantain this
+
 Pull requests are welcome
