@@ -26,6 +26,7 @@ Anjishnu Dey - 96574533184
 Soham Nandy - 9903737471
 
 `This is an automated message sent through a headless server`
+https://github.com/natimerry/whatsapp_spambot_rs
 ";
         format!("Greetings {} {}",self.name,message)
     }
