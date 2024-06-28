@@ -78,7 +78,7 @@ impl Sender{
         driver.action_chain().send_keys(entry.build_msg().replace('\n',
                                                                   &"\u{e008}\u{e006}".to_string()))
             .perform().await.unwrap();
-        sleep(Duration::from_secs(1));
+        tokio::time::sleep(Duration::from_secs(1)).await;
     }
     async fn load_dump(dump_path:&str) -> HashSet<String>{
         let mut str = std::fs::read_to_string(dump_path).expect("Unable to read dump");
@@ -122,7 +122,7 @@ impl Sender{
             }
 
             driver.get(url.clone()).await.unwrap();
-            driver.execute("window.onbeforeunload = function() {};",vec![]);
+            let _ = driver.execute("window.onbeforeunload = function() {};",vec![]);
             let elem= driver.query(By::Css("html > body > div:nth-of-type(1) > div > div > div:nth-of-type(2) > div:nth-of-type(4) > div > footer > div:nth-of-type(1) > div > span:nth-of-type(2) > div > div:nth-of-type(2) > div:nth-of-type(1) > div > div:nth-of-type(1)"))
                 .first().await;
 
@@ -137,10 +137,10 @@ impl Sender{
                     Self::type_msg(&driver, &entry).await;
                     tokio::time::sleep(Duration::from_secs(1)).await;
 
-                    driver.action_chain().key_down(Key::Shift).key_down(Key::Enter).key_up(Key::Shift).key_up(Shift).perform().await;
+                    let _ =driver.action_chain().key_down(Key::Shift).key_down(Key::Enter).key_up(Key::Shift).key_up(Shift).perform().await;
 
                     info!("Sent message to {:?}",entry.name);
-                    writeln!(file, "{}", url);
+                    let _ = writeln!(file, "{}", url);
                     tokio::time::sleep(Duration::from_secs(3)).await;
                 }
                 Err(e) => {
