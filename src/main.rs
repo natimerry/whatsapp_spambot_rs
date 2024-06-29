@@ -4,6 +4,7 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
 use clap::Parser;
+use log::error;
 use tracing::{debug, info, Level, warn};
 use tracing_subscriber::EnvFilter;
 
@@ -67,6 +68,14 @@ async fn main(){
     let url = format!("http://{}:{}",args.address,args.port);
     let all_members = whatsapp::Sender::new(args.file_path,args.dump_path,url)
         .set_profile(args.profile);
-    all_members.send_msgs().await;
+    match all_members.send_msgs().await{
+        Ok(_) => {
+            info!("Finished sending messages!!");
+        }
+        Err(e) => {
+            error!("{:?}",e);
+            error!("Unable to send messages");
+        }
+    }
 
 }

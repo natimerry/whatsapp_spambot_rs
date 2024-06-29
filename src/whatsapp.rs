@@ -49,7 +49,7 @@ impl Sender{
             match regex_phone_number{
                 Some(ref phone_number) => {
                     let fixed_num =  phone_number.get(2).expect("How did we end up here")
-                        .as_str();
+                        .as_str().replace(" ","");
                     debug!("Number fixed with regex: {}",fixed_num);
                     res.phone_number=fixed_num.to_string();
                     all_entries.push(res);
@@ -89,7 +89,6 @@ impl Sender{
     pub async fn send_msgs(self) -> WebDriverResult<()>{
 
         let dump = Self::load_dump(&self.dump_path).await;
-        debug!("{:?}",dump);
         info!("{}",format!("Connecting to chromedriver on port: {}",&self.url.clone()));
         let mut caps = DesiredCapabilities::chrome();
 
