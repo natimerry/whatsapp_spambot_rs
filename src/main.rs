@@ -31,6 +31,9 @@ struct Args {
     #[arg(long)]
     profile:String,
 
+    #[arg(long,default_value_t = false)]
+    firefox: bool,
+
 }
 
 
@@ -68,7 +71,7 @@ async fn main(){
     let url = format!("http://{}:{}",args.address,args.port);
     let all_members = whatsapp::Sender::new(args.file_path,args.dump_path,url)
         .set_profile(args.profile);
-    match all_members.send_msgs().await{
+    match all_members.send_msgs(args.firefox).await{
         Ok(_) => {
             info!("Finished sending messages!!");
         }

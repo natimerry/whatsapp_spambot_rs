@@ -86,20 +86,31 @@ impl Sender{
         dump
     }
 
-    pub async fn send_msgs(self) -> WebDriverResult<()>{
+    pub async fn send_msgs(self,firefox:bool) -> WebDriverResult<()>{
 
         let dump = Self::load_dump(&self.dump_path).await;
-        info!("{}",format!("Connecting to chromedriver on port: {}",&self.url.clone()));
-        let mut caps = DesiredCapabilities::chrome();
+        let mut driver: WebDriver;
 
-        info!("Launching with profile {}",&self.profile.clone().unwrap());
-        // caps.set_binary(&self.binary_path.unwrap());
+        match firefox{
+            true =>{
+                info!("{}",format!("Connecting to chromedriver on port: {}",&self.url.clone()));
+                let mut caps = DesiredCapabilities::firefox();
+                let profile_path = &format!("-profile {}",&self.profile.unwrap());
+                info!("{}",&profile_path);
+                caps.add_arg(profile_path).expect("Failed to set profile");
+                driver = WebDriver::new(&self.url, caps).await?;
+            }
+            false => {
+                info!("{}",format!("Connecting to chromedriver on port: {}",&self.url.clone()));
+                let mut caps = DesiredCapabilities::chrome();
+                let profile_path = &format!("--user-data-dir={}",&self.profile.unwrap());
+                info!("{}",&profile_path);
+                caps.add_arg(profile_path).expect("Failed to set profile");
+                driver = WebDriver::new(&self.url, caps).await?;
 
-        let profile_path = &format!("--user-data-dir={}",&self.profile.unwrap());
-        info!("{}",&profile_path);
-        caps.add_arg(profile_path).expect("Failed to set profile");
+            }
+        }
 
-        let driver = WebDriver::new(&self.url, caps).await?;
         debug!("{:?}",self.entries);
 
         let mut file = std::fs::OpenOptions::new()
