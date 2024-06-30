@@ -36,8 +36,6 @@ impl Sender{
     }
 
 
-
-
     fn parse_csv(file: std::fs::File) -> Vec<Entry>{
         let re: Regex = Regex::new(r"^(\+?\d{1,2}\s?)?(([0-9]{5}) ?([0-9]{5}))").expect("Unable to compile regex");
         let mut all_entries:Vec<Entry> = vec![];
@@ -82,7 +80,8 @@ impl Sender{
     }
     async fn load_dump(dump_path:&str) -> HashSet<String>{
         let mut str = std::fs::read_to_string(dump_path).expect("Unable to read dump");
-        let dump = str.lines().map(|line| line.to_string()).collect::<HashSet<String>>();
+        let dump = str.lines().map(|line| line.to_string().replace(" ",""))
+            .collect::<HashSet<String>>();
         dump
     }
 
@@ -112,7 +111,6 @@ impl Sender{
         }
 
         debug!("{:?}",self.entries);
-
         let mut file = std::fs::OpenOptions::new()
             .write(true)
             .append(true)
@@ -135,16 +133,15 @@ impl Sender{
             let _ = driver.execute("window.onbeforeunload = function() {};",vec![]);
             let elem= driver.query(By::Css("html > body > div:nth-of-type(1) > div > div > div:nth-of-type(2) > div:nth-of-type(4) > div > footer > div:nth-of-type(1) > div > span:nth-of-type(2) > div > div:nth-of-type(2) > div:nth-of-type(1) > div > div:nth-of-type(1)"))
                 .first().await;
-
             match elem{
                 Ok(elem) => {
-                    driver.action_chain().click_element(&elem).key_down_on_element(&elem,Key::Control).key_down('v')
-                        .key_up(Key::Control).key_up('v').perform().await.unwrap();
-                    tokio::time::sleep(Duration::from_secs(1)).await;
-                    //
-                    // driver.action_chain().key_down(Key::Return).key_up(Key::Return).perform().await.unwrap();
+                    elem.wait_until().displayed().await;
 
                     Self::type_msg(&driver, &entry).await;
+                    tokio::time::sleep(Duration::from_secs(1)).await;
+
+                    driver.action_chain().click_element(&elem).key_down_on_element(&elem,Key::Control).key_down('v')
+                        .key_up(Key::Control).key_up('v').perform().await.unwrap();
                     tokio::time::sleep(Duration::from_secs(1)).await;
 
                     let _ =driver.action_chain().key_down(Key::Shift).key_down(Key::Enter).key_up(Key::Shift).key_up(Shift).perform().await;
